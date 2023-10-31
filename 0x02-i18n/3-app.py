@@ -1,49 +1,42 @@
 #!/usr/bin/env python3
-"""
-This module introduces basic babel setup.
-"""
-from flask import Flask, render_template, request
+""" Route module for the API """
+
+
+from flask import Flask, request, render_template
 from flask_babel import Babel
-from typing import List
+from os import getenv
+
 app = Flask(__name__)
-# Instantiate Babel and store it in a module-level variable named 'babel'
 babel = Babel(app)
 
 
-class Config:
-    """
-    Configures available languages in our app.
-    """
-    LANGUAGES: List[str] = ["en", "fr"]
-    BABEL_DEFAULT_LOCALE = "en"
-    BABEL_DEFAULT_TIMEZONE = "UTC"
+class Config(object):
+    """ Setup - Babel configuration """
+    LANGUAGES = ['en', 'fr']
+    # these are the inherent defaults just btw
+    BABEL_DEFAULT_LOCALE = 'en'
+    BABEL_DEFAULT_TIMEZONE = 'UTC'
 
 
-# Set the Flask app's config from the Config class
-app.config.from_object(Config)
+# set the above class object as the configuration for the app
+app.config.from_object('3-app.Config')
 
 
-# @babel.localeselector - throws an error in my case
-def get_locale():
-    """
-    Use request.accept_languages to determine the best
-    match with supported languages.
-    """
-    return request.accept_languages.best_match(
-            app.config['LANGUAGES'])
-
-
-# An alternative to @babel.localeselector
-babel.init_app(app, locale_selector=get_locale)
-
-
-@app.route('/')
-def root() -> str:
-    """
-    Renders 'Hello world' when a request is made to this route.
+@app.route('/', methods=['GET'], strict_slashes=False)
+def index() -> str:
+    """ GET /
+    Return: 3-index.html
     """
     return render_template('3-index.html')
 
 
+@babel.localeselector
+def get_locale() -> str:
+    """ Determines best match for supported languages """
+    return request.accept_languages.best_match(app.config['LANGUAGES'])
+
+
 if __name__ == "__main__":
-    app.run()
+    host = getenv("API_HOST", "0.0.0.0")
+    port = getenv("API_PORT", "5000")
+    app.run(host=host, port=port)
