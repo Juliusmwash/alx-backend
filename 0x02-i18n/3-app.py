@@ -2,7 +2,7 @@
 """
 This module introduces basic babel setup.
 """
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_babel import Babel
 from typing import List
 app = Flask(__name__)
@@ -23,7 +23,7 @@ class Config:
 app.config.from_object(Config)
 
 
-@babel.localeselector
+# @babel.localeselector - throws an error in my case
 def get_locale():
     """
     Use request.accept_languages to determine the best
@@ -31,6 +31,10 @@ def get_locale():
     """
     return request.accept_languages.best_match(
             app.config['LANGUAGES'])
+
+
+# An alternative to @babel.localeselector
+babel.init_app(app, locale_selector=get_locale)
 
 
 @app.route('/')
